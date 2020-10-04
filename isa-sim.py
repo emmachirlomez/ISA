@@ -299,6 +299,8 @@ class InstructionMemory:
                 self.print_instruction(address)
                 
 
+
+#Defining a class with all the simulator parameters.
 class Simulator:
     current_cycle=0
     program_counter=0
@@ -306,16 +308,14 @@ class Simulator:
     dataMemory = DataMemory()
     instructionMemory = InstructionMemory()
 
- 
-    
-
+#initialize object 's' of class 'Simulator'
 s = Simulator()
 
 
-print('\n---Start of simulation---')
 #auxiliary functions
 
-
+#gets a list with the instruction and (registers, constants)
+#needed for the current 'program_counter'
 def read_instruction(program_counter):
     instruction = s.instructionMemory.read_opcode(program_counter)
     if instruction in instructions[3]:
@@ -333,23 +333,27 @@ def read_instruction(program_counter):
     else:
         return [instruction]
 
-
 def PrintStateInfo():
     print(f"Current cycle #{s.current_cycle}:")
     print(f"Current program counter: {s.program_counter}")
     print(f"Instruction being executed: {instructionl}")
     
+#auxiliary function for 'Jump if equal'
 def jeq(s, reg_1, reg_2, reg_3):
     if s.registerFile.read_register(reg_2) == s.registerFile.read_register(reg_3):
         s.program_counter = s.registerFile.read_register(reg_1)-1
-
+        
+#auxiliary function for 'Jump if less than'
 def jlt(s, reg_1, reg_2, reg_3):
     if s.registerFile.read_register(reg_2) < s.registerFile.read_register(reg_3):
         s.program_counter = s.registerFile.read_register(reg_1)-1
 
+#auxiliary function for 'Jump'
 def jr(s, reg_1):
     s.program_counter = s.registerFile.read_register(reg_1) -1
     
+    
+#Initializing dictionary with the complete instruction-set architeture for the sumulator
 instructions = {
     3 :{
         'ADD' : (lambda s, reg_1, reg_2, reg_3 : 
@@ -388,11 +392,7 @@ instructions = {
         
         
     
-    
-#####################################
-##      Write your code here      ##
-####################################
-
+ #SIMULATOR   
 
 for s.current_cycle in range(max_cycles):
     instructionl = list(read_instruction(s.program_counter))
@@ -405,15 +405,16 @@ for s.current_cycle in range(max_cycles):
     if len(instructionl) == 2:
         instructions[1][instructionl[0]](s, instructionl[1])
     if len(instructionl) == 1:
-        instructions[0][instructionl[0]]
-    
+        instructions[0][instructionl[0]] 
     s.program_counter += 1
     
+    
 s.registerFile.print_all()
-s.dataMemory.print_all()
-print(s.current_cycle)
-print(s.program_counter)
+print('\n')
+s.dataMemory.print_used()
+print('\n')
+print(f'Executes in {s.current_cycle} cycles')
 
-#
+
 
 print('\n---End of simulation---\n')
