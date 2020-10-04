@@ -379,11 +379,11 @@ instructions = {
 ##      Write your code here      ##
 ####################################
 
-
-
+for current_cycle in range(max_cycles):
+    instructionl = list(read_instruction(program_counter))
     
  
-print(read_instruction(3))
+print(instructionl)
 
     
 #
