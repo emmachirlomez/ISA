@@ -415,6 +415,6 @@ s.dataMemory.print_used()
 print('\n')
 print(f'Executes in {s.current_cycle} cycles')
 
-
+print('We need to change the outputs to be has requested')
 
 print('\n---End of simulation---\n')
