@@ -308,9 +308,78 @@ dataMemory = DataMemory()
 instructionMemory = InstructionMemory()
 
 print('\n---Start of simulation---')
+#auxiliary functions
 
+def read_instruction(current_cycle):
+    instruction = instructionMemory.read_opcode(current_cycle)
+    op_1 = instructionMemory.read_operand_1(current_cycle)
+    op_2 = instructionMemory.read_operand_2(current_cycle)
+    op_3 = instructionMemory.read_operand_3(current_cycle)
+    return instruction, op_1, op_2, op_3
+
+def PrintStateInfo():
+    print(f"Current cycle #{current_cycle}:")
+    print(f"Current program counter: {program_counter}")
+    print(f"Instruction being executed: {instruction}")
+    
+
+instructions = {
+    'Arithmetic_logic':{
+        'ADD' : (lambda R, reg_1, reg_2, reg_3 : 
+                R.write_register(reg_1,(R.read_register(reg_2) + R.read_register(reg_3)))),      
+        'SUB' : (lambda R, reg_1, reg_2, reg_3 : 
+                R.write_register(reg_1,(R.read_register(reg_2) - R.read_register(reg_3)))),
+        'OR'  : (lambda R, reg_1, reg_2, reg_3 : 
+                R.write_register(reg_1,(R.read_register(reg_2) | R.read_register(reg_3)))),
+        'AND' : (lambda R, reg_1, reg_2, reg_3 : 
+                R.write_register(reg_1,(R.read_register(reg_2) & R.read_register(reg_3)))),
+        'NOT' : (lambda R, reg_1, reg_2, reg_3 : 
+                R.write_register(reg_1,(R.read_register(~reg_2))))            
+    },
+    'Data_transfer' : {
+        'LI' : (lambda R, D, I, reg, constant: R.write_register(reg,constant)),
+        'LD' : (lambda R, D, I, reg_1, reg_2 : R.write_register(reg_1, D.read_data(R.read_register(reg_2)))),
+        'SD' : (lambda R, D, I, reg_1, reg_2  : 
+                dataMemory.write_data(R.read_register(reg_2),R.read_register(reg_1)))
+    },
+    'Control_flow' : {
+        'JR' : (lambda R, I, program_counter, reg_1, reg_2, reg_3 :
+                program_counter * 0 + R.read_register(reg_1)),
+        'JEQ': (lambda R, I, program_counter, reg_1, reg_2, reg_3 : 
+                 program_counter * 0 + R.read_register(reg_1) 
+                 if R.read_register(reg_2) == R.read_register(reg_3) else program_counter),
+        'JLT': (lambda R, I, program_counter, reg_1, reg_2, reg_3 : 
+                 program_counter * 0 + R.read_register(reg_1) 
+                 if R.read_register(reg_2) < R.read_register(reg_3) else program_counter),
+        'NOP': (lambda R, I, program_counter, reg_1, reg_2, reg_3 : program_counter),
+        'END': (lambda R, I, program_counter, reg_1, reg_2, reg_3 : program_counter)
+    }
+}
+        
+        
+    
+    
 #####################################
 ##      Write your code here      ##
 ####################################
+
+
+for current_cycle in range(max_cycles):
+    instruction, op_1, op_2, op_3 = read_instruction(current_cycle)
+    #PrintStateInfo()
+    if instruction == 'END':
+        break
+    if instruction != 'NOP' and instruction != 'END':
+        program_counter += 1
+ 
+registerFile.print_all()
+#print(instructions['LD'](registerFile, dataMemory, instructionMemory,'R1','R2'))
+
+dataMemory.print_all()
+print(instructions['Control_flow']['END'](registerFile,instructionMemory, program_counter,'R1','R2','R3'))
+registerFile.print_all()
+
+    
+#
 
 print('\n---End of simulation---\n')
