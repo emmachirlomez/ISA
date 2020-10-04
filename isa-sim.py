@@ -326,7 +326,7 @@ def read_instruction(program_counter):
         op_1 = instructionMemory.read_operand_1(program_counter)
         return instruction, op_1
     else:
-        return instruction
+        return [instruction]
 
 
 def PrintStateInfo():
@@ -334,6 +334,11 @@ def PrintStateInfo():
     print(f"Current program counter: {program_counter}")
     print(f"Instruction being executed: {instructionl}")
     
+def jump_logical(R, I, program_counter, reg_1, reg_2, reg_3):
+    if instruction == 'JEQ':
+        if R.read_register(reg_2) == R.read_register(reg_3):
+            program_counter = R.read_register(reg_1)
+        
 
 instructions = {
     3 :{
@@ -345,12 +350,8 @@ instructions = {
                 R.write_register(reg_1,(R.read_register(reg_2) | R.read_register(reg_3)))),
         'AND' : (lambda R, I, program_counter, reg_1, reg_2, reg_3 : 
                 R.write_register(reg_1,(R.read_register(reg_2) & R.read_register(reg_3)))),
-        'JEQ': (lambda R, I, program_counter, reg_1, reg_2, reg_3 : 
-                 program_counter * 0 + R.read_register(reg_1) 
-                 if R.read_register(reg_2) == R.read_register(reg_3) else program_counter),
-        'JLT': (lambda R, I, program_counter, reg_1, reg_2, reg_3 : 
-                 program_counter * 0 + R.read_register(reg_1) 
-                 if R.read_register(reg_2) < R.read_register(reg_3) else program_counter)
+        'JEQ': (lambda R, I, program_counter, reg_1, reg_2, reg_3 : program_counter * 0 + R.read_register(reg_1) if R.read_register(reg_2) == R.read_register(reg_3) else program_counter),
+        'JLT': (lambda R, I, program_counter, reg_1, reg_2, reg_3 : program_counter * 0 + R.read_register(reg_1) if R.read_register(reg_2) < R.read_register(reg_3) else program_counter)
                   
     },
     2 : {
@@ -362,7 +363,7 @@ instructions = {
                 R.write_register(reg_1,(~R.read_register(reg_2))))
     },
     1 : {
-        'JR' : (lambda R, I, program_counter, reg_1, reg_2, reg_3 :
+        'JR' : (lambda R, I, program_counter, reg_1 :
                 program_counter * 0 + R.read_register(reg_1))
     },
     0 : {
@@ -392,12 +393,10 @@ for current_cycle in range(max_cycles):
         instructions[1][instructionl[0]](registerFile, instructionMemory, program_counter,
                                             instructionl[1])
     if len(instructionl) == 1:
-        instrutionl = "".join(map(str,instructionl))
-        instructions[0][instructionl](program_counter)
-        program_counter -= 1
-    
-    program_counter += 1
+        instructions[0][instructionl[0]](program_counter)
     PrintStateInfo()
+    program_counter += 1
+    
 
 registerFile.print_all()
 dataMemory.print_all()
