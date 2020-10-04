@@ -393,9 +393,9 @@ instructions = {
 ##      Write your code here      ##
 ####################################
 
+
 for s.current_cycle in range(max_cycles):
     instructionl = list(read_instruction(s.program_counter))
-    PrintStateInfo()
     if instructionl[0] == 'END':
         break
     if len(instructionl) == 4:
@@ -411,7 +411,9 @@ for s.current_cycle in range(max_cycles):
     
 s.registerFile.print_all()
 s.dataMemory.print_all()
-    
+print(s.current_cycle)
+print(s.program_counter)
+
 #
 
 print('\n---End of simulation---\n')
