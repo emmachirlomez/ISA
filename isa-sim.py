@@ -312,5 +312,19 @@ print('\n---Start of simulation---')
 #####################################
 ##      Write your code here      ##
 ####################################
+for current_cycle in range(max_cycles):
+    instruction, op_1, op_2, op_3 = read_instruction(current_cycle)
+    #PrintStateInfo()
+    if instruction == 'END':
+        break
+    if instruction != 'NOP' and instruction != 'END':
+        program_counter += 1
+ 
+registerFile.print_all()
+#print(instructions['LD'](registerFile, dataMemory, instructionMemory,'R1','R2'))
+
+dataMemory.print_all()
+print(instructions['Control_flow']['END'](registerFile,instructionMemory, program_counter,'R1','R2','R3'))
+registerFile.print_all()
 
 print('\n---End of simulation---\n')
