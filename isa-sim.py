@@ -297,78 +297,91 @@ class InstructionMemory:
             if address in self.instruction_memory:
                 print('Address ' + str(address) + ' = ', end='')
                 self.print_instruction(address)
+                
 
+class Simulator:
+    current_cycle=0
+    program_counter=0
+    registerFile = RegisterFile()
+    dataMemory = DataMemory()
+    instructionMemory = InstructionMemory()
 
+ 
+    
 
-current_cycle=0
-program_counter=0
+s = Simulator()
 
-registerFile = RegisterFile()
-dataMemory = DataMemory()
-instructionMemory = InstructionMemory()
 
 print('\n---Start of simulation---')
 #auxiliary functions
 
 
 def read_instruction(program_counter):
-    instruction = instructionMemory.read_opcode(program_counter)
+    instruction = s.instructionMemory.read_opcode(program_counter)
     if instruction in instructions[3]:
-        op_1 = instructionMemory.read_operand_1(program_counter)
-        op_2 = instructionMemory.read_operand_2(program_counter)
-        op_3 = instructionMemory.read_operand_3(program_counter)
+        op_1 = s.instructionMemory.read_operand_1(program_counter)
+        op_2 = s.instructionMemory.read_operand_2(program_counter)
+        op_3 = s.instructionMemory.read_operand_3(program_counter)
         return instruction, op_1, op_2, op_3
     elif instruction in instructions[2]:
-        op_1 = instructionMemory.read_operand_1(program_counter)
-        op_2 = instructionMemory.read_operand_2(program_counter)
+        op_1 = s.instructionMemory.read_operand_1(program_counter)
+        op_2 = s.instructionMemory.read_operand_2(program_counter)
         return instruction, op_1, op_2
     elif instruction in instructions[1]:
-        op_1 = instructionMemory.read_operand_1(program_counter)
+        op_1 = s.instructionMemory.read_operand_1(program_counter)
         return instruction, op_1
     else:
         return [instruction]
 
 
 def PrintStateInfo():
-    print(f"Current cycle #{current_cycle}:")
-    print(f"Current program counter: {program_counter}")
+    print(f"Current cycle #{s.current_cycle}:")
+    print(f"Current program counter: {s.program_counter}")
     print(f"Instruction being executed: {instructionl}")
     
-def jump_logical(R, I, program_counter, reg_1, reg_2, reg_3):
-    if instruction == 'JEQ':
-        if R.read_register(reg_2) == R.read_register(reg_3):
-            program_counter = R.read_register(reg_1)
-        
+def jeq(s, reg_1, reg_2, reg_3):
+    if s.registerFile.read_register(reg_2) == s.registerFile.read_register(reg_3):
+        s.program_counter = s.registerFile.read_register(reg_1)-1
 
+def jlt(s, reg_1, reg_2, reg_3):
+    if s.registerFile.read_register(reg_2) < s.registerFile.read_register(reg_3):
+        s.program_counter = s.registerFile.read_register(reg_1)-1
+
+def jr(s, reg_1):
+    s.program_counter = s.registerFile.read_register(reg_1) -1
+    
 instructions = {
     3 :{
-        'ADD' : (lambda R, I, program_counter, reg_1, reg_2, reg_3 : 
-                R.write_register(reg_1,(R.read_register(reg_2) + R.read_register(reg_3)))),      
-        'SUB' : (lambda R, I, program_counter, reg_1, reg_2, reg_3 : 
-                R.write_register(reg_1,(R.read_register(reg_2) - R.read_register(reg_3)))),
-        'OR'  : (lambda R, I, program_counter, reg_1, reg_2, reg_3 : 
-                R.write_register(reg_1,(R.read_register(reg_2) | R.read_register(reg_3)))),
-        'AND' : (lambda R, I, program_counter, reg_1, reg_2, reg_3 : 
-                R.write_register(reg_1,(R.read_register(reg_2) & R.read_register(reg_3)))),
-        'JEQ': (lambda R, I, program_counter, reg_1, reg_2, reg_3 : program_counter * 0 + R.read_register(reg_1) if R.read_register(reg_2) == R.read_register(reg_3) else program_counter),
-        'JLT': (lambda R, I, program_counter, reg_1, reg_2, reg_3 : program_counter * 0 + R.read_register(reg_1) if R.read_register(reg_2) < R.read_register(reg_3) else program_counter)
-                  
+        'ADD' : (lambda s, reg_1, reg_2, reg_3 : 
+                s.registerFile.write_register(reg_1,(s.registerFile.read_register(reg_2) 
+                + s.registerFile.read_register(reg_3)))),      
+        'SUB' : (lambda s, reg_1, reg_2, reg_3 : 
+                s.registerFile.write_register(reg_1,(s.registerFile.read_register(reg_2) 
+                - s.registerFile.read_register(reg_3)))),
+        'OR'  : (lambda s, reg_1, reg_2, reg_3 : 
+                s.registerFile.write_register(reg_1,(s.registerFile.read_register(reg_2)
+                | s.registerFile.read_register(reg_3)))),
+        'AND' : (lambda s, reg_1, reg_2, reg_3 : 
+                s.registerFile.write_register(reg_1,(s.registerFile.read_register(reg_2) 
+                & s.registerFile.read_register(reg_3)))),
+        'JEQ': (lambda s, reg_1, reg_2, reg_3 : jeq(s, reg_1, reg_2, reg_3)),
+        'JLT': (lambda s, reg_1, reg_2, reg_3 : jlt(s, reg_1, reg_2, reg_3)),
     },
     2 : {
-        'LI' : (lambda R, D, I, reg, constant: R.write_register(reg,int(constant))),
-        'LD' : (lambda R, D, I, reg_1, reg_2 : R.write_register(reg_1, D.read_data(R.read_register(reg_2)))),
-        'SD' : (lambda R, D, I, reg_1, reg_2 : 
-                dataMemory.write_data(R.read_register(reg_2),R.read_register(reg_1))),
-        'NOT' :(lambda R, D, I, reg_1, reg_2: 
-                R.write_register(reg_1,(~R.read_register(reg_2))))
+        'LI' : (lambda s, reg, constant: s.registerFile.write_register(reg,int(constant))),
+        'LD' : (lambda s, reg_1, reg_2 : 
+                s.registerFile.write_register(reg_1, s.dataMemory.read_data(s.registerFile.read_register(reg_2)))),
+        'SD' : (lambda s, reg_1, reg_2 : 
+                s.dataMemory.write_data(s.registerFile.read_register(reg_2),s.registerFile.read_register(reg_1))),
+        'NOT' :(lambda s, reg_1, reg_2: 
+                s.registerFile.write_register(reg_1,(~s.registerFile.read_register(reg_2))))
     },
     1 : {
-        'JR' : (lambda R, I, program_counter, reg_1 :
-                program_counter * 0 + R.read_register(reg_1))
+        'JR' : (lambda s, reg_1 : jr(s, reg_1))
     },
     0 : {
-        'NOP': (lambda program_counter: program_counter),
-        'END': (lambda program_counter : program_counter)
+        'NOP': (lambda s : s.program_counter),
+        'END': (lambda s : s.program_counter)
             
     }
 }
@@ -380,26 +393,24 @@ instructions = {
 ##      Write your code here      ##
 ####################################
 
-for current_cycle in range(max_cycles):
-    instructionl = list(read_instruction(program_counter))
-    print(instructionl)
-    if len(instructionl) == 4:
-        instructions[3][instructionl[0]](registerFile, instructionMemory, program_counter,
-                                            instructionl[1], instructionl[2], instructionl[3])
-    if len(instructionl) == 3:
-        instructions[2][instructionl[0]](registerFile, dataMemory, instructionMemory,
-                                            instructionl[1], instructionl[2])
-    if len(instructionl) == 2:
-        instructions[1][instructionl[0]](registerFile, instructionMemory, program_counter,
-                                            instructionl[1])
-    if len(instructionl) == 1:
-        instructions[0][instructionl[0]](program_counter)
+for s.current_cycle in range(max_cycles):
+    instructionl = list(read_instruction(s.program_counter))
     PrintStateInfo()
-    program_counter += 1
+    if instructionl[0] == 'END':
+        break
+    if len(instructionl) == 4:
+        instructions[3][instructionl[0]](s, instructionl[1], instructionl[2], instructionl[3])
+    if len(instructionl) == 3:
+        instructions[2][instructionl[0]](s, instructionl[1], instructionl[2])
+    if len(instructionl) == 2:
+        instructions[1][instructionl[0]](s, instructionl[1])
+    if len(instructionl) == 1:
+        instructions[0][instructionl[0]]
     
-
-registerFile.print_all()
-dataMemory.print_all()
+    s.program_counter += 1
+    
+s.registerFile.print_all()
+s.dataMemory.print_all()
     
 #
 
