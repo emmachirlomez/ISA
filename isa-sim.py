@@ -308,7 +308,10 @@ class Simulator:
     dataMemory = DataMemory()
     instructionMemory = InstructionMemory()
 
-#initialize object 's' of class 'Simulator'
+#initialize object 's' of class 'Simulator'.
+#'s' will be an object that stores all of the simulator main atributes
+#this makes it possible to define functions that change the values without them
+#needing a return statment.
 s = Simulator()
 
 
@@ -333,6 +336,7 @@ def read_instruction(program_counter):
     else:
         return [instruction]
 
+
 def PrintStateInfo():
     print(f"Current cycle #{s.current_cycle}:")
     print(f"Current program counter: {s.program_counter}")
@@ -355,7 +359,7 @@ def jr(s, reg_1):
     
 #Initializing dictionary with the complete instruction-set architeture for the sumulator
 instructions = {
-    3 :{
+    3 :{ #Dictionaries of intructions that use 3 operands
         'ADD' : (lambda s, reg_1, reg_2, reg_3 : 
                 s.registerFile.write_register(reg_1,(s.registerFile.read_register(reg_2) 
                 + s.registerFile.read_register(reg_3)))),      
@@ -368,27 +372,29 @@ instructions = {
         'AND' : (lambda s, reg_1, reg_2, reg_3 : 
                 s.registerFile.write_register(reg_1,(s.registerFile.read_register(reg_2) 
                 & s.registerFile.read_register(reg_3)))),
-        'JEQ': (lambda s, reg_1, reg_2, reg_3 : jeq(s, reg_1, reg_2, reg_3)),
-        'JLT': (lambda s, reg_1, reg_2, reg_3 : jlt(s, reg_1, reg_2, reg_3)),
-    },
-    2 : {
-        'LI' : (lambda s, reg, constant: s.registerFile.write_register(reg,int(constant))),
-        'LD' : (lambda s, reg_1, reg_2 : 
+        'JEQ' : (lambda s, reg_1, reg_2, reg_3 : jeq(s, reg_1, reg_2, reg_3)),
+        'JLT' : (lambda s, reg_1, reg_2, reg_3 : jlt(s, reg_1, reg_2, reg_3)),
+        },
+        
+    2 : { #Dicitonaries of instructions that use 2 operands
+         'LI' : (lambda s, reg, constant: s.registerFile.write_register(reg,int(constant))),
+         'LD' : (lambda s, reg_1, reg_2 : 
                 s.registerFile.write_register(reg_1, s.dataMemory.read_data(s.registerFile.read_register(reg_2)))),
-        'SD' : (lambda s, reg_1, reg_2 : 
+         'SD' : (lambda s, reg_1, reg_2 : 
                 s.dataMemory.write_data(s.registerFile.read_register(reg_2),s.registerFile.read_register(reg_1))),
-        'NOT' :(lambda s, reg_1, reg_2: 
+         'NOT':(lambda s, reg_1, reg_2: 
                 s.registerFile.write_register(reg_1,(~s.registerFile.read_register(reg_2))))
-    },
-    1 : {
-        'JR' : (lambda s, reg_1 : jr(s, reg_1))
-    },
-    0 : {
-        'NOP': (lambda s : s.program_counter),
-        'END': (lambda s : s.program_counter)
-            
-    }
-}
+        },
+        
+    1 : { #Dictionaries of instructions that use 1 operand
+        'JR'  : (lambda s, reg_1 : jr(s, reg_1))
+        },
+    
+    0 : { #Dictionaries of instructions that do not use operands
+        'NOP' : (lambda s : s.program_counter),
+        'END' : (lambda s : s.program_counter)
+        }
+}   
         
         
     
@@ -396,25 +402,31 @@ instructions = {
 
 for s.current_cycle in range(max_cycles):
     instructionl = list(read_instruction(s.program_counter))
+    length = len(instructionl)
+    PrintStateInfo()
     if instructionl[0] == 'END':
         break
-    if len(instructionl) == 4:
+    if length == 4:
         instructions[3][instructionl[0]](s, instructionl[1], instructionl[2], instructionl[3])
-    if len(instructionl) == 3:
+    if length == 3:
         instructions[2][instructionl[0]](s, instructionl[1], instructionl[2])
-    if len(instructionl) == 2:
+    if length == 2:
         instructions[1][instructionl[0]](s, instructionl[1])
-    if len(instructionl) == 1:
+    if length == 1:
         instructions[0][instructionl[0]] 
     s.program_counter += 1
     
     
 s.registerFile.print_all()
 print('\n')
-s.dataMemory.print_used()
+s.dataMemory.print_all()
 print('\n')
 print(f'Executes in {s.current_cycle} cycles')
 
 
 
 print('\n---End of simulation---\n')
+
+#testing progran performance
+#needs import timeit
+#print (timeit.timeit(number=1))
