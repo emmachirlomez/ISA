@@ -340,7 +340,7 @@ def isa_to_python(obj, inst_nr):
         n2 = n
         print(n)
         print(obj.conversion)
-        while obj.conversion[n2][0] != 'i':
+        while obj.conversion[n2][0:2] != 'if':
             n2 += 1
         obj.conversion[n2] = 'while' + obj.conversion[n2][2:]
         obj.conversion.insert(n, obj.conversion[n2])
@@ -348,47 +348,49 @@ def isa_to_python(obj, inst_nr):
 
 
     def jr(obj, reg_1):
-        print(reg_1)
         reg_1v = int(obj.registerFile.read_register(reg_1))
-        find_if(reg_1v)
+        if reg_1v < inst_nr :
+            find_if(6) # NEED FIX
+                       # need to get value for reg_1 in the current cycle 
+                       # check later
        
             
 
     def jeq(obj, reg_1, reg_2, reg_3):
         reg_1v = int(obj.registerFile.read_register(reg_1))
         if reg_1v > inst_nr:
-            obj.conversion.append(f'if {register_to_variable(reg_2)} != {register_to_variable(reg_3)}:')
+            obj.conversion.append(f'if {register_to_variable(reg_2)} != {register_to_variable(reg_3)}:\n')
         else:
-            obj.conversion.insert(reg_1v-1, f'while {register_to_variable(reg_2)} != {register_to_variable(reg_3)}:')
+            obj.conversion.insert(reg_1v-1, f'while {register_to_variable(reg_2)} != {register_to_variable(reg_3)}:\n')
 
     def jlt(obj, reg_1, reg_2, reg_3):
         reg_1v = int(obj.registerFile.read_register(reg_1))
         if reg_1v > inst_nr:
-            obj.conversion.append(f'if {register_to_variable(reg_2)} >= {register_to_variable(reg_3)}:')
+            obj.conversion.append(f'if {register_to_variable(reg_2)} >= {register_to_variable(reg_3)}:\n')
         else:
-            obj.conversion.insert(reg_1v-1, f'while not {register_to_variable(reg_2)} >= {register_to_variable(reg_3)}:')
+            obj.conversion.insert(reg_1v-1, f'while not {register_to_variable(reg_2)} >= {register_to_variable(reg_3)}:\n')
 
 
 
     instructions_ISAtoPy = {
     3 :{ #Dictionaries of intructions that use 3 operands
         'ADD' : (lambda obj, reg_1, reg_2, reg_3 : 
-                obj.conversion.append(f'{register_to_variable(reg_1)} = {register_to_variable(reg_2)} + {register_to_variable(reg_3)}')),      
+                obj.conversion.append(f'{register_to_variable(reg_1)} = {register_to_variable(reg_2)} + {register_to_variable(reg_3)}\n')),      
         'SUB' : (lambda obj, reg_1, reg_2, reg_3 : 
-                obj.conversion.append(f'{register_to_variable(reg_1)} = {register_to_variable(reg_2)} - {register_to_variable(reg_3)}')),      
+                obj.conversion.append(f'{register_to_variable(reg_1)} = {register_to_variable(reg_2)} - {register_to_variable(reg_3)}\n')),      
         'OR'  : (lambda obj, reg_1, reg_2, reg_3 : 
-                obj.conversion.append(f'{register_to_variable(reg_1)} = {register_to_variable(reg_2)} | {register_to_variable(reg_3)}')),      
+                obj.conversion.append(f'{register_to_variable(reg_1)} = {register_to_variable(reg_2)} | {register_to_variable(reg_3)}\n')),      
         'AND' : (lambda obj, reg_1, reg_2, reg_3 : 
-                 obj.conversion.append(f'{register_to_variable(reg_1)} = {register_to_variable(reg_2)} & {register_to_variable(reg_3)}')),      
+                 obj.conversion.append(f'{register_to_variable(reg_1)} = {register_to_variable(reg_2)} & {register_to_variable(reg_3)}\n')),      
        'JEQ' : (lambda obj, reg_1, reg_2, reg_3 : jeq(obj, reg_1, reg_2, reg_3)),   #jeq(s, reg_1, reg_2, reg_3)),
        'JLT' : (lambda obj, reg_1, reg_2, reg_3 : jlt(obj, reg_1, reg_2, reg_3))    #jlt(s, reg_1, reg_2, reg_3)),
         },
         
     2 : { #Dicitonaries of instructions that use 2 operands
-         'LI' : (lambda obj, reg, constant: obj.conversion.append(f'{register_to_variable(reg)} = {constant}')),
-         'LD' : (lambda obj, reg_1, reg_2 : obj.conversion.append(f'{register_to_variable(reg_1)} = variable[{register_to_variable(reg_2)}]')),
-         'SD' : (lambda obj, reg_1, reg_2 : obj.conversion.append(f'variable[{register_to_variable(reg_1)}] = {register_to_variable(reg_2)}')) ,
-         'NOT': (lambda obj, reg_1, reg_2: obj.conversion.append(f'{register_to_variable(reg_1)} = {~obj.registerFile.read_register(reg_2)}'))
+         'LI' : (lambda obj, reg, constant: obj.conversion.append(f'{register_to_variable(reg)} = {constant}\n')),
+         'LD' : (lambda obj, reg_1, reg_2 : obj.conversion.append(f'{register_to_variable(reg_1)} = variable[{register_to_variable(reg_2)}]\n')),
+         'SD' : (lambda obj, reg_1, reg_2 : obj.conversion.append(f'variable[{register_to_variable(reg_1)}] = {register_to_variable(reg_2)}\n')) ,
+         'NOT': (lambda obj, reg_1, reg_2: obj.conversion.append(f'{register_to_variable(reg_1)} = {~obj.registerFile.read_register(reg_2)}\n'))
         },
         
     1 : { #Dictionaries of instructions that use 1 operand
@@ -543,3 +545,20 @@ print('\n---End of simulation---\n')
 #testing progran performance
 #needs import timeit
 #print (timeit.timeit(number=1))
+
+
+def list_to_code(conv):
+    conv.insert(0,'def main(variable):\n')
+    i = 1
+    for elem in conv:
+        marker = elem[0:2]
+        markers = ['de','wh','if']
+        if marker in markers:
+            conv[i:] = [v for elm in conv[i:] for v in ('  ',elm)]
+        i += 1
+    conv.append('return variable')
+    code = ''
+    print(conv)
+    for elem in conv:
+        code += elem
+    print(code)
