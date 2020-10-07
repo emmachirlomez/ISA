@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Oct  7 01:17:46 2020
+
+@author: Paulo Lima
+"""
+
 import sys
 import re
 
@@ -304,9 +311,12 @@ class InstructionMemory:
 class Simulator:
     current_cycle=0
     program_counter=0
+    max_cycles=max_cycles
     registerFile = RegisterFile()
     dataMemory = DataMemory()
     instructionMemory = InstructionMemory()
+    conversion = []
+    conversionaux = []
 
 #initialize object 's' of class 'Simulator'.
 #'s' will be an object that stores all of the simulator main atributes
@@ -314,9 +324,102 @@ class Simulator:
 #needing a return statment.
 s = Simulator()
 
-
+s2 = Simulator()
 #auxiliary functions
 
+def isa_to_python(obj, inst_nr):
+    instructionl = list(read_instruction(inst_nr)) 
+    length = len(instructionl)
+
+    def register_to_variable(register):
+        alphabet = '0abcdefghijklmnopqrstuvwxyz'
+        variable_name = alphabet[int(register[1:])]
+        return variable_name
+
+    def find_if(n):
+        n2 = n
+        print(n)
+        print(obj.conversion)
+        while obj.conversion[n2][0] != 'i':
+            n2 += 1
+        obj.conversion[n2] = 'while' + obj.conversion[n2][2:]
+        obj.conversion.insert(n, obj.conversion[n2])
+        obj.conversion.pop(n2+1)
+
+
+    def jr(obj, reg_1):
+        print(reg_1)
+        reg_1v = int(obj.registerFile.read_register(reg_1))
+        find_if(reg_1v)
+       
+            
+
+    def jeq(obj, reg_1, reg_2, reg_3):
+        reg_1v = int(obj.registerFile.read_register(reg_1))
+        if reg_1v > inst_nr:
+            obj.conversion.append(f'if {register_to_variable(reg_2)} != {register_to_variable(reg_3)}:')
+        else:
+            obj.conversion.insert(reg_1v-1, f'while {register_to_variable(reg_2)} != {register_to_variable(reg_3)}:')
+
+    def jlt(obj, reg_1, reg_2, reg_3):
+        reg_1v = int(obj.registerFile.read_register(reg_1))
+        if reg_1v > inst_nr:
+            obj.conversion.append(f'if {register_to_variable(reg_2)} >= {register_to_variable(reg_3)}:')
+        else:
+            obj.conversion.insert(reg_1v-1, f'while not {register_to_variable(reg_2)} >= {register_to_variable(reg_3)}:')
+
+
+
+    instructions_ISAtoPy = {
+    3 :{ #Dictionaries of intructions that use 3 operands
+        'ADD' : (lambda obj, reg_1, reg_2, reg_3 : 
+                obj.conversion.append(f'{register_to_variable(reg_1)} = {register_to_variable(reg_2)} + {register_to_variable(reg_3)}')),      
+        'SUB' : (lambda obj, reg_1, reg_2, reg_3 : 
+                obj.conversion.append(f'{register_to_variable(reg_1)} = {register_to_variable(reg_2)} - {register_to_variable(reg_3)}')),      
+        'OR'  : (lambda obj, reg_1, reg_2, reg_3 : 
+                obj.conversion.append(f'{register_to_variable(reg_1)} = {register_to_variable(reg_2)} | {register_to_variable(reg_3)}')),      
+        'AND' : (lambda obj, reg_1, reg_2, reg_3 : 
+                 obj.conversion.append(f'{register_to_variable(reg_1)} = {register_to_variable(reg_2)} & {register_to_variable(reg_3)}')),      
+       'JEQ' : (lambda obj, reg_1, reg_2, reg_3 : jeq(obj, reg_1, reg_2, reg_3)),   #jeq(s, reg_1, reg_2, reg_3)),
+       'JLT' : (lambda obj, reg_1, reg_2, reg_3 : jlt(obj, reg_1, reg_2, reg_3))    #jlt(s, reg_1, reg_2, reg_3)),
+        },
+        
+    2 : { #Dicitonaries of instructions that use 2 operands
+         'LI' : (lambda obj, reg, constant: obj.conversion.append(f'{register_to_variable(reg)} = {constant}')),
+         'LD' : (lambda obj, reg_1, reg_2 : obj.conversion.append(f'{register_to_variable(reg_1)} = variable[{register_to_variable(reg_2)}]')),
+         'SD' : (lambda obj, reg_1, reg_2 : obj.conversion.append(f'variable[{register_to_variable(reg_1)}] = {register_to_variable(reg_2)}')) ,
+         'NOT': (lambda obj, reg_1, reg_2: obj.conversion.append(f'{register_to_variable(reg_1)} = {~obj.registerFile.read_register(reg_2)}'))
+        },
+        
+    1 : { #Dictionaries of instructions that use 1 operand
+        'JR'  : (lambda obj, reg_1 :jr(obj, reg_1))
+        },
+    
+    0 : { #Dictionaries of instructions that do not use operands
+        'NOP' : (lambda obj : ''),
+        'END' : (lambda obj : '' )
+        }
+    }   
+    
+    while inst_nr < (max_cycles):
+        instructionl = list(read_instruction(inst_nr)) 
+        length = len(instructionl)
+        #PrintStateInfo() <------
+        print(instructionl[0])
+        print(instructionl)
+        if instructionl[0] == 'END':
+            break
+        if length == 4:
+            instructions_ISAtoPy[3][instructionl[0]](obj, instructionl[1], instructionl[2], instructionl[3])
+        if length == 3:
+            print(1)
+            instructions_ISAtoPy[2][instructionl[0]](obj, instructionl[1], instructionl[2])
+        if length == 2:
+            instructions_ISAtoPy[1][instructionl[0]](obj, instructionl[1])
+        if length == 1:
+            instructions_ISAtoPy[0][instructionl[0]]
+        inst_nr += 1
+            
 #gets a list with the instruction and (registers, constants)
 #needed for the current 'program_counter'
 def read_instruction(program_counter):
@@ -340,7 +443,7 @@ def read_instruction(program_counter):
 def PrintStateInfo():
     print(f"Current cycle #{s.current_cycle}:")
     print(f"Current program counter: {s.program_counter}")
-    print(f"Instruction being executed: {instructionl[0]}")
+    print(f"Instruction being executed: {instructionl[0]} \n")
     
 #auxiliary function for 'Jump if equal'
 def jeq(s, reg_1, reg_2, reg_3):
@@ -355,6 +458,9 @@ def jlt(s, reg_1, reg_2, reg_3):
 #auxiliary function for 'Jump'
 def jr(s, reg_1):
     s.program_counter = s.registerFile.read_register(reg_1) - 1
+    
+    
+    
     
     
 #Initializing dictionary with the complete instruction-set architeture for the sumulator
@@ -416,15 +522,20 @@ for s.current_cycle in range(max_cycles):
         instructions[1][instructionl[0]](s, instructionl[1])
     if length == 1:
         instructions[0][instructionl[0]] 
+       
+    
     s.program_counter += 1 #increments program counter at the end of every cicle
+ 
+
     
     
+'''    
 s.registerFile.print_all()
 print('\n')
 s.dataMemory.print_all()
 print('\n')
 print(f'Executes in {s.current_cycle} cycles')
-
+'''
 
 
 print('\n---End of simulation---\n')
