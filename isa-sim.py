@@ -317,18 +317,24 @@ class Simulator:
     instructionMemory = InstructionMemory()
     conversion = []
     conversionaux = []
+    def PrintStateInfo(self):
+        print(f"Current cycle #{self.current_cycle}:")
+        print(f"Current program counter: {self.program_counter}")
+
 
 #initialize object 's' of class 'Simulator'.
 #'s' will be an object that stores all of the simulator main atributes
 #this makes it possible to define functions that change the values without them
 #needing a return statment.
 s = Simulator()
-
 s2 = Simulator()
+s3 = Simulator()
+
+
 #auxiliary functions
 
-def isa_to_python(obj, inst_nr):
-    instructionl = list(read_instruction(inst_nr)) 
+def isa_to_python(obj):
+    instructionl = list(read_instruction(obj)) 
     length = len(instructionl)
 
     def register_to_variable(register):
@@ -338,8 +344,6 @@ def isa_to_python(obj, inst_nr):
 
     def find_if(n):
         n2 = n
-        print(n)
-        print(obj.conversion)
         while obj.conversion[n2][0:2] != 'if':
             n2 += 1
         obj.conversion[n2] = 'while' + obj.conversion[n2][2:]
@@ -348,24 +352,32 @@ def isa_to_python(obj, inst_nr):
 
 
     def jr(obj, reg_1):
-        reg_1v = int(obj.registerFile.read_register(reg_1))
-        if reg_1v < inst_nr :
-            find_if(6) # NEED FIX
-                       # need to get value for reg_1 in the current cycle 
-                       # check later
+        s3 = Simulator()
+        simulator(s3,False,obj.program_counter)
+        reg_1v = int(s3.registerFile.read_register(reg_1))
+        if reg_1v < obj.program_counter :
+            obj.conversion.insert(obj.program_counter,'%\n')
+            find_if(reg_1v) # NEED FIX
+                            # need to get value for reg_1 in the current cycle 
+                            # check later
+        else: obj.program_counter = reg_1v - 1 
+             
        
             
 
     def jeq(obj, reg_1, reg_2, reg_3):
+        s3 = Simulator()
+        simulator(s3,False,obj.program_counter)
         reg_1v = int(obj.registerFile.read_register(reg_1))
-        if reg_1v > inst_nr:
+        if reg_1v > obj.program_counter:
             obj.conversion.append(f'if {register_to_variable(reg_2)} != {register_to_variable(reg_3)}:\n')
+            obj.conversion.insert(reg_1v, '%\n' )
         else:
             obj.conversion.insert(reg_1v-1, f'while {register_to_variable(reg_2)} != {register_to_variable(reg_3)}:\n')
 
     def jlt(obj, reg_1, reg_2, reg_3):
         reg_1v = int(obj.registerFile.read_register(reg_1))
-        if reg_1v > inst_nr:
+        if reg_1v > obj.program_counter:
             obj.conversion.append(f'if {register_to_variable(reg_2)} >= {register_to_variable(reg_3)}:\n')
         else:
             obj.conversion.insert(reg_1v-1, f'while not {register_to_variable(reg_2)} >= {register_to_variable(reg_3)}:\n')
@@ -389,8 +401,8 @@ def isa_to_python(obj, inst_nr):
     2 : { #Dicitonaries of instructions that use 2 operands
          'LI' : (lambda obj, reg, constant: obj.conversion.append(f'{register_to_variable(reg)} = {constant}\n')),
          'LD' : (lambda obj, reg_1, reg_2 : obj.conversion.append(f'{register_to_variable(reg_1)} = variable[{register_to_variable(reg_2)}]\n')),
-         'SD' : (lambda obj, reg_1, reg_2 : obj.conversion.append(f'variable[{register_to_variable(reg_1)}] = {register_to_variable(reg_2)}\n')) ,
-         'NOT': (lambda obj, reg_1, reg_2: obj.conversion.append(f'{register_to_variable(reg_1)} = {~obj.registerFile.read_register(reg_2)}\n'))
+         'SD' : (lambda obj, reg_1, reg_2 : obj.conversion.append(f'variable[{register_to_variable(reg_2)}] = {register_to_variable(reg_1)}\n')) ,
+         'NOT': (lambda obj, reg_1, reg_2: obj.conversion.append(f'{register_to_variable(reg_1)} = ~{register_to_variable(reg_2)}\n'))
         },
         
     1 : { #Dictionaries of instructions that use 1 operand
@@ -403,63 +415,56 @@ def isa_to_python(obj, inst_nr):
         }
     }   
     
-    while inst_nr < (max_cycles):
-        instructionl = list(read_instruction(inst_nr)) 
+    while obj.program_counter < obj.max_cycles:
+        instructionl = list(read_instruction(obj)) 
         length = len(instructionl)
-        #PrintStateInfo() <------
-        print(instructionl[0])
-        print(instructionl)
         if instructionl[0] == 'END':
             break
         if length == 4:
             instructions_ISAtoPy[3][instructionl[0]](obj, instructionl[1], instructionl[2], instructionl[3])
         if length == 3:
-            print(1)
             instructions_ISAtoPy[2][instructionl[0]](obj, instructionl[1], instructionl[2])
         if length == 2:
             instructions_ISAtoPy[1][instructionl[0]](obj, instructionl[1])
         if length == 1:
             instructions_ISAtoPy[0][instructionl[0]]
-        inst_nr += 1
+        obj.program_counter += 1
             
 #gets a list with the instruction and (registers, constants)
 #needed for the current 'program_counter'
-def read_instruction(program_counter):
-    instruction = s.instructionMemory.read_opcode(program_counter)
+def read_instruction(obj):
+    instruction = obj.instructionMemory.read_opcode(obj.program_counter)
     if instruction in instructions[3]:
-        op_1 = s.instructionMemory.read_operand_1(program_counter)
-        op_2 = s.instructionMemory.read_operand_2(program_counter)
-        op_3 = s.instructionMemory.read_operand_3(program_counter)
+        op_1 = obj.instructionMemory.read_operand_1(obj.program_counter)
+        op_2 = obj.instructionMemory.read_operand_2(obj.program_counter)
+        op_3 = obj.instructionMemory.read_operand_3(obj.program_counter)
         return instruction, op_1, op_2, op_3
     elif instruction in instructions[2]:
-        op_1 = s.instructionMemory.read_operand_1(program_counter)
-        op_2 = s.instructionMemory.read_operand_2(program_counter)
+        op_1 = obj.instructionMemory.read_operand_1(obj.program_counter)
+        op_2 = obj.instructionMemory.read_operand_2(obj.program_counter)
         return instruction, op_1, op_2
     elif instruction in instructions[1]:
-        op_1 = s.instructionMemory.read_operand_1(program_counter)
+        op_1 = obj.instructionMemory.read_operand_1(obj.program_counter)
         return instruction, op_1
     else:
         return [instruction]
 
 
-def PrintStateInfo():
-    print(f"Current cycle #{s.current_cycle}:")
-    print(f"Current program counter: {s.program_counter}")
-    print(f"Instruction being executed: {instructionl[0]} \n")
+
     
 #auxiliary function for 'Jump if equal'
-def jeq(s, reg_1, reg_2, reg_3):
-    if s.registerFile.read_register(reg_2) == s.registerFile.read_register(reg_3):
-        s.program_counter = s.registerFile.read_register(reg_1) - 1
+def jeq(obj, reg_1, reg_2, reg_3):
+    if obj.registerFile.read_register(reg_2) == obj.registerFile.read_register(reg_3):
+        obj.program_counter = obj.registerFile.read_register(reg_1) - 1
         
 #auxiliary function for 'Jump if less than'
-def jlt(s, reg_1, reg_2, reg_3):
-    if s.registerFile.read_register(reg_2) < s.registerFile.read_register(reg_3):
-        s.program_counter = s.registerFile.read_register(reg_1) -1
+def jlt(obj, reg_1, reg_2, reg_3):
+    if obj.registerFile.read_register(reg_2) < obj.registerFile.read_register(reg_3):
+        obj.program_counter = obj.registerFile.read_register(reg_1) -1
 
 #auxiliary function for 'Jump'
-def jr(s, reg_1):
-    s.program_counter = s.registerFile.read_register(reg_1) - 1
+def jr(obj, reg_1):
+    obj.program_counter = obj.registerFile.read_register(reg_1) - 1
     
     
     
@@ -468,97 +473,104 @@ def jr(s, reg_1):
 #Initializing dictionary with the complete instruction-set architeture for the sumulator
 instructions = {
     3 :{ #Dictionaries of intructions that use 3 operands
-        'ADD' : (lambda s, reg_1, reg_2, reg_3 : 
-                s.registerFile.write_register(reg_1,(s.registerFile.read_register(reg_2) 
-                + s.registerFile.read_register(reg_3)))),      
-        'SUB' : (lambda s, reg_1, reg_2, reg_3 : 
-                s.registerFile.write_register(reg_1,(s.registerFile.read_register(reg_2) 
-                - s.registerFile.read_register(reg_3)))),
-        'OR'  : (lambda s, reg_1, reg_2, reg_3 : 
-                s.registerFile.write_register(reg_1,(s.registerFile.read_register(reg_2)
-                | s.registerFile.read_register(reg_3)))),
-        'AND' : (lambda s, reg_1, reg_2, reg_3 : 
-                s.registerFile.write_register(reg_1,(s.registerFile.read_register(reg_2) 
-                & s.registerFile.read_register(reg_3)))),
-        'JEQ' : (lambda s, reg_1, reg_2, reg_3 : jeq(s, reg_1, reg_2, reg_3)),
-        'JLT' : (lambda s, reg_1, reg_2, reg_3 : jlt(s, reg_1, reg_2, reg_3)),
+        'ADD' : (lambda obj, reg_1, reg_2, reg_3 : 
+                obj.registerFile.write_register(reg_1,(obj.registerFile.read_register(reg_2) 
+                + obj.registerFile.read_register(reg_3)))),      
+        'SUB' : (lambda obj, reg_1, reg_2, reg_3 : 
+                obj.registerFile.write_register(reg_1,(obj.registerFile.read_register(reg_2) 
+                - obj.registerFile.read_register(reg_3)))),
+        'OR'  : (lambda obj, reg_1, reg_2, reg_3 : 
+                obj.registerFile.write_register(reg_1,(obj.registerFile.read_register(reg_2)
+                | obj.registerFile.read_register(reg_3)))),
+        'AND' : (lambda obj, reg_1, reg_2, reg_3 : 
+                obj.registerFile.write_register(reg_1,(obj.registerFile.read_register(reg_2) 
+                & obj.registerFile.read_register(reg_3)))),
+        'JEQ' : (lambda obj, reg_1, reg_2, reg_3 : jeq(obj, reg_1, reg_2, reg_3)),
+        'JLT' : (lambda obj, reg_1, reg_2, reg_3 : jlt(obj, reg_1, reg_2, reg_3)),
         },
         
     2 : { #Dicitonaries of instructions that use 2 operands
-         'LI' : (lambda s, reg, constant: s.registerFile.write_register(reg,int(constant))),
-         'LD' : (lambda s, reg_1, reg_2 : 
-                s.registerFile.write_register(reg_1, s.dataMemory.read_data(s.registerFile.read_register(reg_2)))),
-         'SD' : (lambda s, reg_1, reg_2 : 
-                s.dataMemory.write_data(s.registerFile.read_register(reg_2),s.registerFile.read_register(reg_1))),
-         'NOT':(lambda s, reg_1, reg_2: 
-                s.registerFile.write_register(reg_1,(~s.registerFile.read_register(reg_2))))
+         'LI' : (lambda obj, reg, constant: obj.registerFile.write_register(reg,int(constant))),
+         'LD' : (lambda obj, reg_1, reg_2 : 
+                obj.registerFile.write_register(reg_1, obj.dataMemory.read_data(obj.registerFile.read_register(reg_2)))),
+         'SD' : (lambda obj, reg_1, reg_2 : 
+                obj.dataMemory.write_data(obj.registerFile.read_register(reg_2),obj.registerFile.read_register(reg_1))),
+         'NOT':(lambda obj, reg_1, reg_2: 
+                obj.registerFile.write_register(reg_1,(~obj.registerFile.read_register(reg_2))))
         },
         
     1 : { #Dictionaries of instructions that use 1 operand
-        'JR'  : (lambda s, reg_1 : jr(s, reg_1))
+        'JR'  : (lambda obj, reg_1 : jr(obj, reg_1))
         },
     
     0 : { #Dictionaries of instructions that do not use operands
-        'NOP' : (lambda s : s.program_counter),
-        'END' : (lambda s : s.program_counter)
+        'NOP' : (lambda obj : obj.program_counter),
+        'END' : (lambda obj : obj.program_counter)
         }
 }   
         
         
     
  #SIMULATOR   
+def simulator(obj, opt = True, *n):
+    for obj.current_cycle in range(max_cycles):
+        #instructionl is a list the whole instruction in the form ['instruction','reg_1'_'reg_2']
+        #it can have different lengths depending on the number of registers the instruction needs
+        instructionl = list(read_instruction(obj)) 
+        length = len(instructionl) 
+        if  opt:
+            obj.PrintStateInfo()
+            print(f"Instruction being executed: {instructionl[0]} \n")
+        if (not opt) and (sum(n) == obj.program_counter):
+            break
+        if instructionl[0] == 'END':
+            break
+        if length == 4:
+            instructions[3][instructionl[0]](obj, instructionl[1], instructionl[2], instructionl[3])
+        if length == 3:
+            instructions[2][instructionl[0]](obj, instructionl[1], instructionl[2])
+        if length == 2:
+            instructions[1][instructionl[0]](obj, instructionl[1])
+        if length == 1:
+            instructions[0][instructionl[0]] 
+        obj.program_counter += 1 #increments program counter at the end of every cicle
 
-for s.current_cycle in range(max_cycles):
-    #instructionl is a list the whole instruction in the form ['instruction','reg_1'_'reg_2']
-    #it can have different lengths depending on the number of registers the instruction needs
-    instructionl = list(read_instruction(s.program_counter)) 
-    length = len(instructionl)
-    PrintStateInfo()
-    if instructionl[0] == 'END':
-        break
-    if length == 4:
-        instructions[3][instructionl[0]](s, instructionl[1], instructionl[2], instructionl[3])
-    if length == 3:
-        instructions[2][instructionl[0]](s, instructionl[1], instructionl[2])
-    if length == 2:
-        instructions[1][instructionl[0]](s, instructionl[1])
-    if length == 1:
-        instructions[0][instructionl[0]] 
-       
-    
-    s.program_counter += 1 #increments program counter at the end of every cicle
- 
-
-    
-    
-'''    
-s.registerFile.print_all()
-print('\n')
-s.dataMemory.print_all()
-print('\n')
-print(f'Executes in {s.current_cycle} cycles')
-'''
-
-
-print('\n---End of simulation---\n')
-
+    if  opt:
+        obj.registerFile.print_all()
+        print('\n')
+        obj.dataMemory.print_all()
+        print('\n')
+        print(f'Executes in {obj.current_cycle} cycles')
+        print('\n---End of simulation---\n')
+        print('\nOpen the "Isa.py" file for python version of the assembley code')
 #testing progran performance
 #needs import timeit
 #print (timeit.timeit(number=1))
 
-
+#This will create a file "Isa.py" in current working directory with the python 
+#translation of the program given
 def list_to_code(conv):
     conv.insert(0,'def main(variable):\n')
-    i = 1
-    for elem in conv:
-        marker = elem[0:2]
-        markers = ['de','wh','if']
-        if marker in markers:
-            conv[i:] = [v for elm in conv[i:] for v in ('  ',elm)]
-        i += 1
-    conv.append('return variable')
+    for i in range(len(conv)): 
+        marker = conv[i][-2] # -2 because last element of the string is always \n
+        if marker == ':':    # if it is ':' it means that the next line is indented
+            for j in range(i+1,len(conv)): 
+                conv[j] = '    ' + conv[j]
+    for i2 in range(len(conv)): 
+        marker = conv[i2][-2] # 
+        if marker in '%':    # if it is ':' it means that the next line is indented
+            conv[i2] = ''
+            for j in range(i2+1,len(conv)): 
+                conv[j] = conv[j][4:]
+    conv.append('    return variable')
     code = ''
-    print(conv)
     for elem in conv:
         code += elem
-    print(code)
+    code = "#ISA to Py - Version 1.0\n\n" + code 
+    file = open("Isa.py","w")
+    file.write(code)
+    file.close()
+
+simulator(s)
+isa_to_python(s2)
+list_to_code(s2.conversion)

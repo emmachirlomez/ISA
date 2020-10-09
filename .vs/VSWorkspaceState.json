@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\test_1"
+    "\\test_1",
+    "\\test_2"
   ],
-  "SelectedNode": "\\test_1\\expected_1.txt",
+  "SelectedNode": "\\test_1\\program_1.txt",
   "PreviewInSolutionExplorer": false
 }
