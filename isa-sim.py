@@ -371,16 +371,20 @@ def isa_to_python(obj):
         reg_1v = int(obj.registerFile.read_register(reg_1))
         if reg_1v > obj.program_counter:
             obj.conversion.append(f'if {register_to_variable(reg_2)} != {register_to_variable(reg_3)}:\n')
-            obj.conversion.insert(reg_1v, '%\n' )
+            obj.conversionaux.append( reg_1v ) 
         else:
             obj.conversion.insert(reg_1v-1, f'while {register_to_variable(reg_2)} != {register_to_variable(reg_3)}:\n')
 
     def jlt(obj, reg_1, reg_2, reg_3):
+        s3 = Simulator()
+        simulator(s3,False,obj.program_counter)
         reg_1v = int(obj.registerFile.read_register(reg_1))
         if reg_1v > obj.program_counter:
-            obj.conversion.append(f'if {register_to_variable(reg_2)} >= {register_to_variable(reg_3)}:\n')
+            obj.conversion.append(f'if {register_to_variable(reg_2)} <= {register_to_variable(reg_3)}:\n')
+
+            obj.conversionaux.append( reg_1v ) 
         else:
-            obj.conversion.insert(reg_1v-1, f'while not {register_to_variable(reg_2)} >= {register_to_variable(reg_3)}:\n')
+            obj.conversion.insert(reg_1v-1, f'while {register_to_variable(reg_2)} <= {register_to_variable(reg_3)}:\n')
 
 
 
@@ -549,16 +553,19 @@ def simulator(obj, opt = True, *n):
 
 #This will create a file "Isa.py" in current working directory with the python 
 #translation of the program given
-def list_to_code(conv):
+def list_to_code(obj):
+    conv = obj.conversion
     conv.insert(0,'def main(variable):\n')
     for i in range(len(conv)): 
         marker = conv[i][-2] # -2 because last element of the string is always \n
         if marker == ':':    # if it is ':' it means that the next line is indented
             for j in range(i+1,len(conv)): 
                 conv[j] = '    ' + conv[j]
+    for elem in obj.conversionaux:
+        conv.insert(elem-1, 'i have no clue why but if I dont write something here it doesnt work%\n')
     for i2 in range(len(conv)): 
         marker = conv[i2][-2] # 
-        if marker in '%':    # if it is ':' it means that the next line is indented
+        if marker in '%':    # if it is '%' it means that the next line is un-indented
             conv[i2] = ''
             for j in range(i2+1,len(conv)): 
                 conv[j] = conv[j][4:]
@@ -566,11 +573,11 @@ def list_to_code(conv):
     code = ''
     for elem in conv:
         code += elem
-    code = "#ISA to Py - Version 1.0\n\n" + code 
+    code = "#ISA to Py - Version 1.0\n\n#The following code is a python version from the " + sys.argv[2] +" file\n\n" + code 
     file = open("Isa.py","w")
     file.write(code)
     file.close()
 
 simulator(s)
 isa_to_python(s2)
-list_to_code(s2.conversion)
+list_to_code(s2)
