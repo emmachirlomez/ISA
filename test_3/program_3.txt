@@ -3,61 +3,137 @@ EMMA: MUL and MULC
 DUSANA: ADD and sub
 PAulo: Eval mul X
 
-MAIN: PC[0:20]
-ADD: [20:40]
-SUB: [40:60]
-MULC: [60:100]
-MUL: [100:140]
-MULX: [140:180]
-Eval: [180:END]
-R1 - Name of the function
-R10 - Start of p1 (in memory)
+MAIN: PC[0:29]
+ADD: [30:59]
+SUB: [60:99]
+MULC: [100:139]
+MUL: [140:179]
+MULX: [180:219]
+Eval: [219:END]
+
+Please use the following notation:
+
+R0 is a fixed 0
+R1 is a fixed 1
+R2 represents the subroutine to run
+---- The above registers can't be changed in any subroutine!!!
+
+R3 is a temporary that is already set to 1
+R4:R10 and R14:R15 are temporary registers
+----Use them however you want to
+
+R10 - Start of p1 (location in memory)
 R11 - Length of p1
-R12 - Start of p2 (in memory)
-R13 - Length of p2  
-R14 - Set to 1
-R15 - Counter
+R12 - Start of p2 or Constant (location in memory)  in MUL there is no need for this so R12 and R13 get set to 0
+R13 - Length of p2  (1 if constant)   
+
+
+R1 values and corresponding subroutine
+1 - ADD
+2 - SUB
+3 - MULC
+4 - MUL
+5 - MULX
+6 - EVAL
+
+
 ---------------------
-lala
-
-1:
-2:
-3:
-4:
-5: 
-6: 
-#ADD
-15:JLT (5) , R11, R13   // We need to set register to the value to the first operand
-2:ADD R8, R10, R0      // R8 is the start of the result
-3:ADD R9, R11, R0      // R9 is the length of the result
-4:JR (7)               // Need to set a register to that value
-5:ADD R8, R12, R0      // sets the start and length in case P2 is the largest poly     
-6:ADD R9, R13, R0      
-7: LD R2, R10          //Load first value of p1
-8: LD R3, R12          //Load first value of p2
-9: ADD R4, R2, R3      // Sum Elements
-10: SD R4, R8          // Save the sum to memory
-
-11: ADD R10, R10, R14   // Increment R10 by 1
-12: ADD R12, R12, R14   // Increment R12 by 1
-13: ADD R8, R8, R14     // Increment R8 by 1
-14: JLT (100), R9, R8   // Breaks the loop in case R8==R9
-13: JR (7)  ///         // Loops back to instruction 7
+# This program effectuates various operations in polynomials
+# We represent polynomials using lists:
+# a0 + a1*x +  a2*(x^2)... will be represented by [a0,a1,a2...]
+# We represent the polynomials in memory by saving the values in contiguous locations 
+# Each polynomial is then obtained by 2 values :
+# The location of the first element and the length of the polynomial
+# As the program can run different operations, we decide the operation by reading R2
 
 
 
+# Main
+0: LI R1, 1; # Fixed to 1
+1: LI R2, 1; # Set to subroutine
+2: LI R3, 1: # Set to 1
+# ADD, SUB and MUL get 2 polynomials as arguments
+# Loading first polynomial (Random values for now)
+3: LI R10, 0;
+4: LI R11, 5;  
+# Loading the second polynomial, constant, or nothing
+5: LI R12, 5;
+6: LI R13, 7;
+
+# Jumping to the specified subroutine 
+# ADD
+7: LI R14, 20;
+8: LI R15, 1;
+9: JEQ R14, R2, R15;
+# SUBTRACTION
+10: LI R14, 40;
+11: LI R15, 2;
+12: JEQ R14, R2, R15;
+# MULC 
+13: LI R14, 60;
+14: LI R15, 3;
+15: JEQ R14, R2, R15;
+# MUL 
+16: LI R14, 100;
+17: LI R15, 4;
+18: JEQ R14, R2, R15;
+#MULX 
+19: LI R14, 140;
+20: LI R15, 5;
+21: JEQ R14, R2, R15;
+# EVAL
+22: LI R14, 180;
+23: LI R15, 6;
+24: JEQ R14, R2, R15;
+
+25: NOP;
+26: NOP;
+27: NOP;
+28: NOP;
+29: END; # Jump to line 29 to end the program
 
 
-100:END;
 
 
-20
+# ADD
+30: LI R14, 34;          # R14, R15 and R9 will be used to declare where to jump
+31: LI R15, 36;
+32: LI R9, 46;           # Loading with PC to end subroutine
+30: JLT R14 , R11, R13;  # Jumps to PC 34 if P2 is larger than P1
+31: ADD R4, R10, R0;     # R4 is the start of the result
+32: ADD R5, R11, R0;     # R5 is the length of the result
+33: JR R15;              # 34 and 35 are only executed if P2 is larger than P1
 
-P2 > P1 -  P2[1,1,1]    P1[1] 
+34: ADD R4, R12, R0;     # sets the start and length in case P2 is the largest poly
+35: ADD R5, R13, R0;
 
+36: ADD R3, R0, R4      # save R4 to R3 since we will change R4
 
+37: LD R6, R10;         # Load first value of p1
+38: LD R7, R12;         # Load first value of p2
+39: ADD R8, R6, R7;     # Sum elements
+40: SD R8, R4;          # Save the sum to memory location (value R4)
 
-if len(p1) < len(p2)
-a = len(p1)
-    a = len(p2)
+41: ADD R10, R10, R1;   # Increment R10 by 1
+42: ADD R12, R12, R1;   # Increment R12 by 1
+43: ADD R4, R4, R1;     # Increment R4 by 1
+44: JLT R9, R5, R4;     # Breaks the loop in case R5<R4
+45: JR R15;             # Loops back to instruction 37
+
+46: ADD R4, R0, R3;     # Sets R4 back to the start of the result
+47: LI R1, 29;    
+48: JR R1;              #Quiting 
+
+49: NOP;
+50: NOP;
+51: NOP;
+52: NOP;
+53: NOP;
+54: NOP;
+55: NOP;
+56: NOP;
+57: NOP;
+58: NOP;
+59: NOP;
+
 
