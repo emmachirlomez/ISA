@@ -32,7 +32,15 @@ However, the recomended way to do it if you really want to is:
 * Send the values of `a` and `b` as two predefined registers, one of which could be used to store the answer (for instance, `a`'s register).
 * Also store the address the function was called from in another register, and make the `QuickMultiply` function jump back there.
 
-### Potential uses
+### Potential use
 
-* Exponentiation in logaritmic time with multiplications
-* Multiplying a polinomial by a constant (although should keep in mind the 255 lines limit)
+Multiplying to polinomials.
+In other words, simulate this code:
+```python
+def multiply(a, b):
+    ans = [0 for i in range(len(a) + len(b))]
+    for i in range(len(a)):
+        for j in range(len(b)):
+            ans[i + j] += a[i] * b[j]
+    return ans
+```
