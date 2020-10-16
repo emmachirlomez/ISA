@@ -574,10 +574,10 @@ def list_to_code(obj):
     for elem in conv:
         code += elem
     code = "#ISA to Py - Version 1.0\n\n#The following code is a python version from the " + sys.argv[2] +" file\n\n" + code 
-    file = open("Isa.py","w")
-    file.write(code)
-    file.close()
+    # file = open("Isa.py","w")
+    # ile.write(code)
+    # file.close()
 
 simulator(s)
-isa_to_python(s2)
-list_to_code(s2)
+# isa_to_python(s2)
+# list_to_code(s2)

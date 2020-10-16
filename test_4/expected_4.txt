@@ -1,0 +1,32 @@
+Register file content:
+R0 = 0
+R1 = 1
+R2 = 224
+R3 = 15
+R4 = 210
+R5 = 16
+R6 = 2
+R7 = 8
+R8 = 0
+R9 = 0
+R10 = 1
+R11 = 123
+R12 = 0
+R13 = 0
+R14 = 0
+R15 = 0
+
+
+Data memory content:
+Address 0 = 14
+Address 1 = 15
+Address 2 = 210
+Address 3 = 0
+Address 4 = 0
+Address 5 = 0
+Address 6 = 0
+Address 7 = 0
+Address 8 = 0
+Address 9 = 0
+Address 10 = 0
+...
