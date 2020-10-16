@@ -1,0 +1,15 @@
+- R0 = 0
+- R1 = 1
+- R2 = 
+  - 1 - ADD
+  - 2 - SUB
+  - 3 - MULC
+  - 4 - MUL
+  - 5 - MULX
+  - 6 - EVAL
+- R3-9 are temporary
+- R10 - start of p1
+- R11 - length of p1
+- R12 - start of p2
+- R13 length of p2
+- Polinomials are stored in continous chuncks in RAM (Starting from R10 / R12)

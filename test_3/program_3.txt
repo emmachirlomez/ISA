@@ -19,7 +19,7 @@ R2 represents the subroutine to run
 ---- The above registers can't be changed in any subroutine!!!
 
 R3 is a temporary that is already set to 1
-R4:R10 and R14:R15 are temporary registers
+R4:R9 and R14:R15 are temporary registers
 ----Use them however you want to
 
 R10 - Start of p1 (location in memory)
@@ -28,7 +28,7 @@ R12 - Start of p2 or Constant (location in memory)  in MUL there is no need for 
 R13 - Length of p2  (1 if constant)   
 
 
-R1 values and corresponding subroutine
+R2 values and corresponding subroutine
 1 - ADD
 2 - SUB
 3 - MULC
