@@ -1,3 +1,4 @@
+-------------------
 EMMA: MUL and MULC
 DUSANA: ADD and sub
 PAulo: Eval mul X
@@ -16,7 +17,9 @@ R12 - Start of p2 (in memory)
 R13 - Length of p2  
 R14 - Set to 1
 R15 - Counter
-[x,x^2] 
+---------------------
+
+
 1:
 2:
 3:
