@@ -1,0 +1,60 @@
+EMMA: MUL and MULC
+DUSANA: ADD and sub
+PAulo: Eval mul X
+
+MAIN: PC[0:20]
+ADD: [20:40]
+SUB: [40:60]
+MULC: [60:100]
+MUL: [100:140]
+MULX: [140:180]
+Eval: [180:END]
+R1 - Name of the function
+R10 - Start of p1 (in memory)
+R11 - Length of p1
+R12 - Start of p2 (in memory)
+R13 - Length of p2  
+R14 - Set to 1
+R15 - Counter
+[x,x^2] 
+1:
+2:
+3:
+4:
+5: 
+6: 
+#ADD
+15:JLT (5) , R11, R13   // We need to set register to the value to the first operand
+2:ADD R8, R10, R0      // R8 is the start of the result
+3:ADD R9, R11, R0      // R9 is the length of the result
+4:JR (7)               // Need to set a register to that value
+5:ADD R8, R12, R0      // sets the start and length in case P2 is the largest poly     
+6:ADD R9, R13, R0      
+7: LD R2, R10          //Load first value of p1
+8: LD R3, R12          //Load first value of p2
+9: ADD R4, R2, R3      // Sum Elements
+10: SD R4, R8          // Save the sum to memory
+
+11: ADD R10, R10, R14   // Increment R10 by 1
+12: ADD R12, R12, R14   // Increment R12 by 1
+13: ADD R8, R8, R14     // Increment R8 by 1
+14: JLT (100), R9, R8   // Breaks the loop in case R8==R9
+13: JR (7)  ///         // Loops back to instruction 7
+
+
+
+
+
+100:END;
+
+
+20
+
+P2 > P1 -  P2[1,1,1]    P1[1] 
+
+
+
+if len(p1) < len(p2)
+a = len(p1)
+    a = len(p2)
+
