@@ -9,7 +9,8 @@ SUB: [60:99]
 MULC: [100:139]
 MUL: [140:179]
 MULX: [180:219]
-Eval: [219:END]
+Eval: [219:300]
+Multiplication auxiliary[300:END]
 
 Please use the following notation:
 
