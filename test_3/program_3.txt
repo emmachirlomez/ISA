@@ -9,7 +9,7 @@ SUB: [60:99]
 MULC: [100:139]
 MUL: [140:179]
 MULX: [180:219]
-Eval: [219:300]
+Eval: [220:300]
 Multiplication auxiliary[300:END]
 
 Please use the following notation:
@@ -19,7 +19,7 @@ R1 is a fixed 1
 R2 represents the subroutine to run
 ---- The above registers can't be changed in any subroutine!!!
 
-R3 is a temporary that is already set to 1
+R3 is a temporary that is already set to 1 (Use it as a pointer as well)
 R4:R9 and R14:R15 are temporary registers
 ----Use them however you want to
 
@@ -122,8 +122,8 @@ R2 values and corresponding subroutine
 45: JR R15;             # Loops back to instruction 37
 
 46: ADD R4, R0, R3;     # Sets R4 back to the start of the result
-47: LI R1, 29;    
-48: JR R1;              #Quiting 
+47: LI R3, 29;          # Sets point to the end of the program
+48: JR R3;              # Quiting 
 
 49: NOP;
 50: NOP;
@@ -137,4 +137,130 @@ R2 values and corresponding subroutine
 58: NOP;
 59: NOP;
 
+# ...
 
+# MulX
+180: LI R4, 181;         # Loading value to use on branch expression
+# Loop
+181: ADD R14, R11, R1:   # Set pointer R14 to the first empty location in memory after the list
+182: LD R15, R11;        # Load last element of the list to R15
+183: SD R15, R14;        # Save last element in the next location in memory
+184: SUB R11, R1;        # Shift pointer one location to the left
+185: JLT R4, R10, R11;   # Loop back if R10 < R11
+# Ending
+186: SD R10, R0:         # Sets first element in the list to 0
+187: LI R3, 29;          # Sets pointer to the end of the program 
+188: JR R3;
+189: NOP; 
+190: NOP; 
+191: NOP; 
+192: NOP; 
+193: NOP; 
+194: NOP;
+195: NOP;
+196: NOP;
+197: NOP;
+198: NOP;
+199: NOP;
+200: NOP;
+201: NOP;
+202: NOP;
+203: NOP;
+204: NOP;
+205: NOP;
+206: NOP;
+207: NOP;
+208: NOP;
+209: NOP;
+210: NOP;
+211: NOP;
+212: NOP;
+213: NOP;
+214: NOP;
+215: NOP;
+216: NOP;
+217: NOP;
+218: NOP;
+219: NOP;
+
+# EVAL
+220: 
+221:
+222:
+223:
+224:
+225:
+226: 
+227: 
+228:
+229:
+230:
+231:
+232:
+233:
+234:
+235:
+236:
+237:
+238:
+239:
+240:
+241:
+242:
+243:
+244:
+245:
+246:
+247:
+248:
+249:
+250:
+251:
+252:
+253:
+254:
+255:
+256:
+257:
+258:
+259:
+260:
+261:
+262:
+263:
+264:
+265:
+266:
+267:
+268:
+269:
+270:
+271:
+272:
+273:
+274:
+275:
+276:
+277:
+278:
+279:
+280:
+281:
+282:
+283:
+284:
+285:
+286:
+287:
+288:
+289:
+290:
+291:
+292:
+293:
+294:
+295:
+296:
+297:
+298:
+299:
