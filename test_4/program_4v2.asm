@@ -1,5 +1,6 @@
-# This is another version to do a multiplication of a list by a constant
+# This is a way to implement a multiplication of a list by a constant
 # This method uses the recursive definition of multiplication
+# This method also uses recursion to run through the list
 # The constant is represented by C 
 # The element being multiplied is represented by elem
 
