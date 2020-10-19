@@ -307,7 +307,9 @@ class InstructionMemory:
                 
 
 
-#Defining a class with all the simulator parameters.
+# Defining a class with all the simulator parameters
+# We will use OOP to implement the simulator 
+
 class Simulator:
     current_cycle=0
     program_counter=0
@@ -322,16 +324,24 @@ class Simulator:
         print(f"Current program counter: {self.program_counter}")
 
 
-#initialize object 's' of class 'Simulator'.
-#'s' will be an object that stores all of the simulator main atributes
-#this makes it possible to define functions that change the values without them
-#needing a return statment.
+# initialize object 's' of class 'Simulator'.
+# 's' will be an object that stores all of the simulator atributes
+# this makes it possible to define functions that change the values without them
+# needing a return statment.
 s = Simulator()
+
+
+# s2 and s3 are used in the decompiler (isa_to_python)
 s2 = Simulator()
 s3 = Simulator()
 
 
-#auxiliary functions
+
+
+# isa_to_python is an attempt on a Decompiler from ISA to python
+# it takes the program file and outputs a list which elements
+# are lines of python code with characters representing indentation
+# This list is later converted by the function list to code to a .py file
 
 def isa_to_python(obj):
     instructionl = list(read_instruction(obj)) 
@@ -434,8 +444,11 @@ def isa_to_python(obj):
             instructions_ISAtoPy[0][instructionl[0]]
         obj.program_counter += 1
             
-#gets a list with the instruction and (registers, constants)
-#needed for the current 'program_counter'
+
+# Simulator Auxiliary Functions
+
+# gets a list with the instruction and (registers, constants)
+# needed for the current 'program_counter'
 def read_instruction(obj):
     instruction = obj.instructionMemory.read_opcode(obj.program_counter)
     if instruction in instructions[3]:
@@ -455,8 +468,9 @@ def read_instruction(obj):
 
 
 
+### IF POSSIBLE TRY TO IMPLEMENT THE 3 FOLLOWING FUNCTIONS DIRECTLY ON THE DICTIONARY!
     
-#auxiliary function for 'Jump if equal'
+# auxiliary function for 'Jump if equal'
 def jeq(obj, reg_1, reg_2, reg_3):
     if obj.registerFile.read_register(reg_2) == obj.registerFile.read_register(reg_3):
         obj.program_counter = obj.registerFile.read_register(reg_1) - 1
@@ -472,8 +486,16 @@ def jr(obj, reg_1):
     
     
     
-    
-    
+##########################################################################################
+# We represent the given instruction set using a dictionary                              #
+# This allows our simulator to run diferent instruction sets if needed                   #
+# To use different instrucion sets we just need to provide a dictionary                  #
+# in the same format as bellow                                                           #
+# This dictionary could also be provided as a XML file as in assignment 1, but for       #
+# the sake of simplicity we initialize the dictionary directly in this script            #
+##########################################################################################
+
+
 #Initializing dictionary with the complete instruction-set architeture for the sumulator
 instructions = {
     3 :{ #Dictionaries of intructions that use 3 operands
@@ -515,8 +537,8 @@ instructions = {
         
         
     
- #SIMULATOR   
-def simulator(obj, opt = True, *n):
+# SIMULATOR   
+def simulator(obj, opt = True, *n):                 #  opt and *n are used in the decompiler
     for obj.current_cycle in range(max_cycles):
         #instructionl is a list the whole instruction in the form ['instruction','reg_1'_'reg_2']
         #it can have different lengths depending on the number of registers the instruction needs
@@ -544,15 +566,16 @@ def simulator(obj, opt = True, *n):
         print('\n')
         obj.dataMemory.print_all()
         print('\n')
-        print(f'Executes in {obj.current_cycle} cycles')
+        print(f'Executes in {obj.current_cycle} cycles.')
         print('\n---End of simulation---\n')
         print('\nOpen the "Isa.py" file for python version of the assembley code')
-#testing progran performance
+
+#testing program performance
 #needs import timeit
 #print (timeit.timeit(number=1))
 
-#This will create a file "Isa.py" in current working directory with the python 
-#translation of the program given
+# This will create a file "Isa.py" in current working directory with the python 
+# translation of the program given
 def list_to_code(obj):
     conv = obj.conversion
     conv.insert(0,'def main(variable):\n')
@@ -579,5 +602,7 @@ def list_to_code(obj):
     # file.close()
 
 simulator(s)
+
+# To run decompiler just uncomment the 2 following lines
 # isa_to_python(s2)
 # list_to_code(s2)
