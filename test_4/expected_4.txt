@@ -9,8 +9,8 @@ R6 = 2
 R7 = 8
 R8 = 0
 R9 = 0
-R10 = 1
-R11 = 123
+R10 = 0
+R11 = 0
 R12 = 0
 R13 = 0
 R14 = 0
@@ -29,4 +29,3 @@ Address 7 = 0
 Address 8 = 0
 Address 9 = 0
 Address 10 = 0
-...

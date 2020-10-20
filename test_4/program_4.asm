@@ -12,8 +12,8 @@
 7: LI R6, 2;            # Index of answer in RAM
 8: SD R4, R6;           # Save answer to RAM
 9: NOP;
-10: AND R10, R1, R1;
-11: LI R11, 123;
+10: NOP;
+11: NOP;
 12: NOP;
 13: NOP;
 14: NOP;
