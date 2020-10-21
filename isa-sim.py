@@ -7,6 +7,7 @@ Created on Wed Oct  7 01:17:46 2020
 
 import sys
 import re
+import time
 
 print("\nWelcome to the ISA simulator! - Designed by Dušana Milinković, Emma Andreea Chirlomez and Paulo Lima")
 
@@ -540,6 +541,7 @@ instructions = {
 # SIMULATOR   
 def simulator(obj, opt = True, *n):                 #  opt and *n are used in the decompiler
     for obj.current_cycle in range(max_cycles):
+        time.sleep(2)
         #instructionl is a list the whole instruction in the form ['instruction','reg_1'_'reg_2']
         #it can have different lengths depending on the number of registers the instruction needs
         instructionl = list(read_instruction(obj)) 
@@ -597,9 +599,9 @@ def list_to_code(obj):
     for elem in conv:
         code += elem
     code = "#ISA to Py - Version 1.0\n\n#The following code is a python version from the " + sys.argv[2] +" file\n\n" + code 
-    # file = open("Isa.py","w")
-    # ile.write(code)
-    # file.close()
+    file = open("Isa.py","w")
+    file.write(code)
+    file.close()
 
 simulator(s)
 
