@@ -28,8 +28,7 @@
 0: LI R1, 1; # Fixed to 1
 1: LI R2, 3; # Set to subroutine
 2: LI R3, 1; # Set to 1
-# ADD, SUB and MUL get 2 polynomials as arguments
-# Loading first polynomial (Random values for now)
+# Loading first polynomial 
 3: LI R10, 0;
 4: LI R11, 8;  
 # Loading the second polynomial, constant, or nothing
