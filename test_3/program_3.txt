@@ -30,7 +30,7 @@
 
 # Main
 0: LI R1, 1; # Fixed to 1
-1: LI R2, 1; # Set to subroutine
+1: LI R2, 3; # Set to subroutine
 2: LI R3, 1; # Set to 1
 # ADD, SUB and MUL get 2 polynomials as arguments
 # Loading first polynomial (Random values for now)
@@ -76,7 +76,7 @@
 # ADD
 30: LI R14, 37;          # pointers used to declare where to jump
 31: LI R15, 39;
-32: LI R9, 48;           # Loading with PC to end subroutine
+32: LI R9, 49;           # Loading with PC to end subroutine
 33: JLT R14, R11, R13;   # Jumps to PC 34 if P2 is larger than P1
 34: ADD R4, R10, R0;     # R4 is the start of the result
 35: ADD R5, R11, R0;     # R5 is the length of the result
@@ -88,20 +88,20 @@
 39: LD R6, R10;         # Load first value of p1
 40: LD R7, R12;         # Load first value of p2
 41: ADD R8, R6, R7;     # Sum elements
-42: SD R8, R4;          # Save the sum to memory location (value R4)
+42: SD R0, R12;
+43: SD R8, R4;          # Save the sum to memory location (value R4)
 
-43: ADD R10, R10, R1;   # Increment R10 by 1
-44: ADD R12, R12, R1;   # Increment R12 by 1
-45: ADD R4, R4, R1;     # Increment R4 by 1
-46: JLT R9, R5, R4;     # Breaks the loop in case R5<R4
-47: JR R15;             # Loops back to instruction 37
+44: ADD R10, R10, R1;   # Increment R10 by 1
+45: ADD R12, R12, R1;   # Increment R12 by 1
+46: ADD R4, R4, R1;     # Increment R4 by 1
+47: JLT R9, R5, R4;     # Breaks the loop in case R5<R4
+48: JR R15;             # Loops back to instruction 37
 
-48: ADD R4, R0, R14;     # Sets R4 back to the start of the result
-49: ADD R11, R0, R5;    # Sets R11 to the length of the result
-50: LI R3, 29;          # Sets pointer to the end of the program
-51: JR R3;              # Quiting 
+49: ADD R4, R0, R14;    # Sets R4 back to the start of the result
+50: ADD R11, R0, R5;    # Sets R11 to the length of the result
+51: LI R3, 29;          # Sets pointer to the end of the program
+52: JR R3;              # Quiting 
 
-52: NOP;
 53: NOP;
 54: NOP;
 55: NOP;
@@ -111,29 +111,34 @@
 59: NOP;
 
 # SUB
-60: NOP;
-61: NOP;
-62: NOP;
-63: NOP;
-64: NOP;
-65: NOP;
-66: NOP;
-67: NOP;
-68: NOP;
-69: NOP;
-70: NOP;
-71: NOP;
-72: NOP;
-73: NOP;
-74: NOP;
-75: NOP;
-76: NOP;
-77: NOP;
-78: NOP;
-79: NOP;
-80: NOP;
-81: NOP;
-82: NOP;
+60: LI R14, 67;          # pointers used to declare where to jump
+61: LI R15, 69;
+62: LI R9, 79;           # Loading with PC to end subroutine
+63: JLT R14, R11, R13;   # Jumps to PC 34 if P2 is larger than P1
+64: ADD R4, R10, R0;     # R4 is the start of the result
+65: ADD R5, R11, R0;     # R5 is the length of the result
+66: JR R15;              # 34 and 35 are only executed if P2 is larger than P1
+
+67: ADD R4, R10, R0;     # sets the start and length in case P2 is the largest poly
+68: ADD R5, R13, R0;
+
+69: LD R6, R10;         # Load first value of p1
+70: LD R7, R12;         # Load first value of p2
+71: SUB R8, R6, R7;     # Subtract elements
+72: SD R0, R12;         # Clear value in memory(R12)
+73: SD R8, R4;          # Save the difference to memory location (value R4)
+
+74: ADD R10, R10, R1;   # Increment R10 by 1
+75: ADD R12, R12, R1;   # Increment R12 by 1
+76: ADD R4, R4, R1;     # Increment R4 by 1
+77: JLT R9, R5, R4;     # Breaks the loop in case R5<R4
+78: JR R15;             # Loops back to instruction 37
+
+79: ADD R4, R0, R14;    # Sets R4 back to the start of the result
+80: ADD R11, R0, R5;    # Sets R11 to the length of the result
+81: LI R3, 29;          # Sets pointer to the end of the program
+82: JR R3;              # Quiting 
+
 83: NOP;
 84: NOP;
 85: NOP;
@@ -153,23 +158,26 @@
 99: NOP;
 
 # MULC
-100: NOP;
-101: NOP;
-102: NOP;
-103: NOP;
-104: NOP;
-105: NOP;
-106: NOP;
-107: NOP;
-108: NOP;
-108: NOP;
-109: NOP;
-110: NOP;
-111: NOP;
-112: NOP;
-113: NOP;
-114: NOP;
-115: NOP;
+100: LI R5, 111;
+101: LI R6, 106;
+102: LI R7, 103;
+103: LI R8, 29;
+
+104: LI R4, 0;           # R4 will be the register saving the result
+105: LD R15, R12;        # Loads c to register R15
+106: LD R14, R10;        # Loads the elem to be multiplied
+
+107: JEQ R5, R0, R15;    # if R15 is 0 move to next elem
+108: ADD R4, R4, R14;    # recursive mult (A*B = A+A and B-1 until B = 0)
+
+109: SUB R15, R15, R1;   # subtracts 1 from c       
+110: JR R6;              # loops back with c-1
+111: SD R4, R10;         # saves elem after multiplication
+
+112: ADD R10, R10, R1;  # moves pointer R10 to next elem
+113: JLT R8, R12, R10;  # ends the subroutine after going through the last elem
+114: LI R3, 104;        # Loops back to step (104) if there is still elements to be multiplied
+115: JR R3;
 116: NOP;
 117: NOP;
 118: NOP;
@@ -183,6 +191,7 @@
 126: NOP;
 127: NOP;
 128: NOP;
+
 129: NOP;
 130: NOP;
 131: NOP;
