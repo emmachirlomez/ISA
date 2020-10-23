@@ -9,14 +9,10 @@
 # This subroutine adds 2 polynomials
 # SUB: [60:99]
 # This subroutine subtracts 2 polynomials
-# MULC: [100:139]
+# MULC: [100:179]
 # This subroutine multiplies a polynomial by a constant
-# MUL: [140:179]
-# This function multiplies 2 polynomails
 # MULX: [180:219]
 # This function mulitplies a polynomial by it's variable
-# Eval: [220:300]
-# This function evaluates a polynomial at a given value
 
 
 # This program effectuates various operations in polynomials
@@ -53,19 +49,17 @@
 13: LI R14, 100;
 14: LI R15, 3;
 15: JEQ R14, R2, R15;
-# MUL 
-16: LI R14, 140;
-17: LI R15, 4;
-18: JEQ R14, R2, R15;
+16: NOP;
+17: NOP;
+18: NOP;
 # MULX 
 19: LI R14, 180;
 20: LI R15, 5;
 21: JEQ R14, R2, R15;
-# EVAL
-22: LI R14, 220;
-23: LI R15, 6;
-24: JEQ R14, R2, R15;
 
+22: NOP;
+23: NOP;
+24: NOP;
 25: NOP;
 26: NOP;
 27: NOP;
@@ -203,8 +197,6 @@
 137: NOP;
 138: NOP;
 139: NOP;
-
-# MUL
 140: NOP;
 141: NOP;
 142: NOP;
@@ -247,7 +239,7 @@
 179: NOP;
 
 
-# MulX
+# MULX
 180: LI R4, 181;         # Loading value to use on branch expression
 # Loop
 181: ADD R14, R11, R1;   # Set pointer R14 to the first empty location in memory after the list
@@ -259,100 +251,4 @@
 186: SD R10, R0;         # Sets first element in the list to 0
 187: LI R3, 29;          # Sets pointer to the end of the program 
 188: JR R3;              # Quits
-189: NOP; 
-190: NOP; 
-191: NOP; 
-192: NOP; 
-193: NOP; 
-194: NOP;
-195: NOP;
-196: NOP;
-197: NOP;
-198: NOP;
-199: NOP;
-200: NOP;
-201: NOP;
-202: NOP;
-203: NOP;
-204: NOP;
-205: NOP;
-206: NOP;
-207: NOP;
-208: NOP;
-209: NOP;
-210: NOP;
-211: NOP;
-212: NOP;
-213: NOP;
-214: NOP;
-215: NOP;
-216: NOP;
-217: NOP;
-218: NOP;
-219: NOP;
 
-# EVAL
-220: LI R5, 230;
-221: LI R6, 225;
-
-222: LI R4, 0;         # R4 will be the register saving the result
-223: LD R15, R12;      # Loads c to register R15
-224: LD R14, R10;      # Loads the elem to be multiplied
-225: ADD R4, R4, R14;  # recursive mult (A*B = A+A and B-1 until B = 0)
-
-226: JEQ R5, R0, R15;  # if R15 is 0 move to next elem
-227: SUB R15, R15, R1; # subtracts 1 from c       
-228: JR R6;            # loops back with c-1
-229: SD R4, R10;       # saves elem after multiplication
-
-230: ADD R10, R10, R1; # moves pointer R10 to next elem
-231: JLT R9, R11, R10; # ends the subroutine after going through the last elem
-232: JR R1;            # Loops back to step (2) if there is still elements to be multiplied 
-233: NOP;
-234: NOP;
-235: NOP;
-236: NOP;
-237: NOP;
-238: NOP;
-239: NOP;
-240: NOP;
-241: NOP;
-242: NOP;
-243: NOP;
-244: NOP;
-245: NOP;
-246: NOP;
-247: NOP;
-248: NOP;
-249: NOP;
-250: NOP;
-251: NOP;
-252: NOP;
-253: NOP;
-254: NOP;
-255: NOP;
-256: NOP;
-257: NOP;
-258: NOP;
-259: NOP;
-260: NOP;
-261: NOP;
-262: NOP;
-263: NOP;
-264: NOP;
-265: NOP;
-266: NOP;
-267: NOP;
-268: NOP;
-269: NOP;
-270: NOP;
-271: NOP;
-272: NOP;
-273: NOP;
-274: NOP;
-275: NOP;
-276: NOP;
-277: NOP;
-278: NOP;
-279: NOP;
-280: NOP;
