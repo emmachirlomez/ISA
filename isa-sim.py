@@ -223,7 +223,7 @@ class InstructionMemory:
     '''
     This method returns the OPCODE of the instruction located in the instruction
     memory location in the specified address. For example, if the instruction is ADD
-    R1, R2, R3;, this method returns ADD.
+    R1, R2, R3;, this method returns ADD. 
     '''
     def read_opcode(self, address):
         if address < 0 or address > 255:
@@ -450,7 +450,7 @@ def isa_to_python(obj):
 
 # gets a list with the instruction and (registers, constants)
 # needed for the current 'program_counter'
-def read_instruction(obj):
+def read_instruction(obj):              
     instruction = obj.instructionMemory.read_opcode(obj.program_counter)
     if instruction in instructions[3]:
         op_1 = obj.instructionMemory.read_operand_1(obj.program_counter)
@@ -505,7 +505,7 @@ instructions = {
                 + obj.registerFile.read_register(reg_3)))),      
         'SUB' : (lambda obj, reg_1, reg_2, reg_3 : 
                 obj.registerFile.write_register(reg_1,(obj.registerFile.read_register(reg_2) 
-                - obj.registerFile.read_register(reg_3)))),
+                - int(obj.registerFile.read_register(reg_3))))),
         'OR'  : (lambda obj, reg_1, reg_2, reg_3 : 
                 obj.registerFile.write_register(reg_1,(obj.registerFile.read_register(reg_2)
                 | obj.registerFile.read_register(reg_3)))),
@@ -541,7 +541,6 @@ instructions = {
 # SIMULATOR   
 def simulator(obj, opt = True, *n):                 #  opt and *n are used in the decompiler
     for obj.current_cycle in range(max_cycles):
-        time.sleep(2)
         #instructionl is a list the whole instruction in the form ['instruction','reg_1'_'reg_2']
         #it can have different lengths depending on the number of registers the instruction needs
         instructionl = list(read_instruction(obj)) 
